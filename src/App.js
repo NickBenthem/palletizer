@@ -9,7 +9,7 @@ import Link from "@mui/material/Link";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 import ExecuteCard from "./components/ExecuteCard";
 import HelperCards from "./components/HelperCards";
@@ -17,8 +17,10 @@ import MainImage from "./components/MainImage";
 import Pallete from "./components/Pallete";
 import SecondHeader from "./components/SecondHeader";
 import _ from "lodash";
-import WorkerBuilder from "./worker/worker-builder";
-import Worker from "./worker/worker";
+
+import { useWorker, WORKER_STATUS } from "@koale/useworker";
+
+
 
 const cards = [1, 2, 3];
 const theme = createTheme();
@@ -50,6 +52,104 @@ function App() {
 
   const [image, setImage] = useState(null);
   const [imageInfo, setImageInfo] = useState(null);
+
+  useEffect(() => {
+    const kickoffWorker =  () => {
+
+      // create a pool of workers that can accept an argument and return a result
+      const workerPool = [];
+      var maxWorkers = navigator.hardwareConcurrency || 4;
+
+      for (let i = 0; i < maxWorkers; i++) {
+        workerPool.push(new Worker("./worker.js"));
+      }
+
+      const chunkedData = _.chunk(imageInfo, parseInt(800 / maxWorkers));
+      // shallow copy of chunkedData
+      const chunkedDataCopy = chunkedData.slice();
+
+
+      // when a worker is available, send it the image data
+      workerPool.forEach((worker,index) => {
+
+        // console.log(chunkedData[index]);
+        worker.postMessage({ 
+          palleteArray: palleteColors, 
+          pixelsArray: chunkedData[index]
+      })
+  
+        worker.onmessage = function(e) {
+          console.log('Message received from worker', e.data);
+          chunkedDataCopy[index] = e.data;
+          setImage(createImageData(_.flatten(chunkedDataCopy)));
+      }  
+      
+
+        // worker.onmessage = (e) => {
+        //   if (e.data.status === WORKER_STATUS.RECEIVED) {
+        //     worker.postMessage(imageInfo);
+        //   } else if (e.data.status === WORKER_STATUS.DONE) {
+        //     console.log("Worker: Message received from main script");
+        //     console.log(e.data.results);
+        //   }
+        // };
+      });
+    
+
+    //   const myWorker = new Worker("./worker.js");
+    //   myWorker.postMessage({ 
+    //     palleteArray: palleteColors, 
+    //     pixelsArray: _.chunk(imageInfo,200)[0]
+    // })
+
+    //   console.log('Message posted to worker');
+  
+    //   myWorker.onmessage = function(e) {
+    //       console.log('Message received from worker', e.data);
+    //   }  
+      
+    };
+    if (imageInfo) {
+      kickoffWorker();
+    }
+  }, [imageInfo]);
+  // Turn an array of RGB pixels into an image data object
+  const createImageData = (pixels) => {
+     // get the canvas
+     const loadNewCanvas = (pixels) =>{
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 800;
+        canvas.height = 800;
+        const ctx = canvas.getContext("2d");
+
+        var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        var data = imageData.data;
+        var flattenedPixels = _.flatten(_.flatten(pixels));
+        // prepare data
+        // for(var i = 0; i < data.length; i++) {
+        //   data[i] = flattenedPixels[i]
+        // }
+
+        // draw newly modified pixels back onto the canvas
+        ctx.putImageData(new ImageData(new Uint8ClampedArray(flattenedPixels),800,800), 0, 0  );
+        let returnValue = canvas.toDataURL();
+        resolve(returnValue);
+        return returnValue;
+      });
+  }
+  loadNewCanvas(pixels).then(
+    (value) => {
+      setImage(value);
+    }
+  )
+
+    // get the data URL from the image data
+ 
+    // setImageInfo(dataURL);
+  };
+
+
   const kickeroffer = () => {
     // Convert data URL to image data
     // convertURIToImageData
@@ -88,11 +188,11 @@ function App() {
       })
       .catch((err) => console.error(err));
       
-    const htmlCanvas = document.createElement("canvas");
-    const offscreen = htmlCanvas.transferControlToOffscreen();
-    const worker = new WorkerBuilder(Worker);
+
+    // const htmlCanvas = document.createElement("canvas");
+    // const offscreen = htmlCanvas.transferControlToOffscreen();
     
-    worker.postMessage({ canvas: offscreen }, [offscreen]);
+    // worker.postMessage({ canvas: offscreen }, [offscreen]);
 
     //   await image.decode();
     //   image.onload = function(){

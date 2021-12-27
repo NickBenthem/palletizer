@@ -54,7 +54,7 @@ const UploadAndDisplayImage = ({ image, setImage }) => {
     // Update the document title using the browser API
     // if (!dataURL.ok) throw new Error(dataURL.status);
     // console.log(dataURL.result);
-  });
+  },[]);
 
   return (
     <Grid item sx={{ maxWidth: "800px", maxHeight: "800px" }}>

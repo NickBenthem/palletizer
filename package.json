@@ -5,8 +5,10 @@
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
+    "@koale/useworker": "^4.0.2",
     "@mui/icons-material": "^5.2.1",
     "@mui/material": "^5.2.3",
+    "@shopify/web-worker": "^4.0.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -25,7 +27,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "worker": "webpack --watch"
   },
   "eslintConfig": {
     "extends": [
@@ -44,5 +47,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "customize-cra": "^1.0.0",
+    "react-app-rewired": "^2.1.9",
+    "worker-loader": "^3.0.8"
   }
 }
