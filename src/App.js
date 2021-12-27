@@ -40,15 +40,16 @@ function Copyright() {
 
 function App() {
   const [palleteColors, setPalleteColors] = useState([
-    { id: 1, color: "#000000" },
-    { id: 2, color: "#FFFFFF" },
-    { id: 3, color: "#FF0000" },
-    { id: 4, color: "#00FF00" },
-    { id: 5, color: "#0000FF" },
-    { id: 6, color: "#FFFF00" },
-    { id: 7, color: "#FF00FF" },
-    { id: 8, color: "#00FFFF" },
+    { id: 1, color: "#7e7380" },
+    { id: 2, color: "#bcacbf" },
+    { id: 3, color: "#efffe6" },
+    { id: 4, color: "#d9d6c3" },
+    { id: 5, color: "#788073" },
+    // { id: 6, color: "#FFFF00" },
+    // { id: 7, color: "#FF00FF" },
+    // { id: 8, color: "#00FFFF" },
   ]);
+  // #7e7380, #bcacbf, #efffe6, #d9d6c3, #788073
 
   const [image, setImage] = useState(null);
   const [imageInfo, setImageInfo] = useState(null);
@@ -64,7 +65,7 @@ function App() {
         workerPool.push(new Worker("./worker.js"));
       }
 
-      const chunkedData = _.chunk(imageInfo, parseInt(800 / maxWorkers));
+      const chunkedData = _.chunk(imageInfo, parseInt(800 / maxWorkers)+1);
       // shallow copy of chunkedData
       const chunkedDataCopy = chunkedData.slice();
 
@@ -168,6 +169,7 @@ function App() {
         canvas.height = img.height;
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0);
+        // Chunk 1d array into rows. Each row is an array of pixels. RGBA is the values we have originally.
         let returnVals = _.chunk(
           _.chunk(ctx.getImageData(0, 0, img.width, img.height).data, 4),
           800

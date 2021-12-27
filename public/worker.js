@@ -22,11 +22,19 @@ onmessage = function(e) {
   console.log('Worker: Message received from main script');
 
   const euclideanDistance = (color1, color2) => {
+    // return Math.sqrt(
+    //   Math.pow(color1[0] - color2[0], 2) +
+    //     Math.pow(color1[1] - color2[1], 2) +
+    //     Math.pow(color1[2] - color2[2], 2)
+    // );
+        
     return Math.sqrt(
-      Math.pow(color1[0] - color2[0], 2) +
-        Math.pow(color1[1] - color2[1], 2) +
-        Math.pow(color1[2] - color2[2], 2)
+      Math.abs(color1[0] - color2[0]) +
+      Math.abs(color1[1] - color2[1]) +
+      Math.abs(color1[2] - color2[2])
     );
+
+    
   }
  const closestColor = (color,pallete) => {
    // Find the closest RGB color in the pallete given euclidean distance
